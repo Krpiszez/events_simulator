@@ -5,7 +5,10 @@ import com.example.rokevents.entity.Event;
 import com.example.rokevents.entity.ItemDropRate;
 import com.example.rokevents.repository.EventRepository;
 import com.example.rokevents.repository.ItemDropRateRepository;
-import com.example.rokevents.repository.MilestoneRewardRepository;
+import com.example.rokevents.util.EventSimulationHandler;
+import com.example.rokevents.util.PullCalculation;
+import com.example.rokevents.util.impl.EsmeraldaHouseSimulationHandler;
+import com.example.rokevents.util.impl.HolyKnightsTreasureSimulationHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,13 +26,7 @@ public class SimulationService {
     @Autowired
     private ItemDropRateRepository itemDropRateRepository;
 
-    @Autowired
-    private MilestoneRewardRepository milestoneRewardRepository;
-
     public SimulationResponse simulate(SimulationRequest request) {
-        long totalPulls;
-        long leftoverGems = 0;
-        long gemSpent;
 
         Event event = eventRepository.findById(request.getEventId())
                 .orElseThrow(() -> new IllegalArgumentException("Event not found: " + request.getEventId()));
@@ -42,16 +39,16 @@ public class SimulationService {
 
         if (request.getPullCount() != null && request.getPullCount() > 0) {
             totalPulls = request.getPullCount();
-            gemSpent = calculateRequiredGems(totalPulls);
+            gemSpent = handler.calculateRequiredGems(totalPulls);
         } else {
-            PullCalculation pullCalculation = calculatePulls(request.getGemAmount());
+            PullCalculation pullCalculation = handler.calculatePulls(request.getGemAmount());
 
             totalPulls = pullCalculation.getTotalPulls();
             leftoverGems = pullCalculation.getLeftoverGems();
             gemSpent = request.getGemAmount();
         }
 
-        List<ConsolidatedItem> milestoneRewards = calculateMilestoneRewards(totalPulls);
+        List<ConsolidatedItem> milestoneRewards = handler.calculateMilestoneRewards(totalPulls);
 
         List<ItemDropRate> dropRates = itemDropRateRepository.findByEventId(event.getId());
         if (dropRates.isEmpty()) {
@@ -167,119 +164,6 @@ public class SimulationService {
         return consolidated;
     }
 
-    private PullCalculation calculatePulls(long gemAmount) {
-        long pulls = 2; // first 2 pulls free
-        long remainingGems = gemAmount;
-
-        // next 2 pulls cost 400 each
-        long discountedPulls = Math.min(2, remainingGems / 400);
-        pulls += discountedPulls;
-        remainingGems -= discountedPulls * 400;
-
-        // unlimited 5-pull bundles at 3600 gems
-        long fivePullBundles = remainingGems / 3600;
-        pulls += fivePullBundles * 5;
-        remainingGems -= fivePullBundles * 3600;
-
-        // leftover gems buy single pulls at 800 gems each
-        long singlePulls = remainingGems / 800;
-        pulls += singlePulls;
-        remainingGems -= singlePulls * 800;
-
-        return new PullCalculation(pulls, remainingGems);
-    }
-
-    private static class PullCalculation {
-        private final long totalPulls;
-        private final long leftoverGems;
-
-        public PullCalculation(long totalPulls, long leftoverGems) {
-            this.totalPulls = totalPulls;
-            this.leftoverGems = leftoverGems;
-        }
-
-        public long getTotalPulls() {
-            return totalPulls;
-        }
-
-        public long getLeftoverGems() {
-            return leftoverGems;
-        }
-    }
-
-    private long calculateRequiredGems(long requestedPulls) {
-        if (requestedPulls <= 2) {
-            return 0;
-        }
-
-        long remainingPulls = requestedPulls;
-        long requiredGems = 0;
-
-        // first 2 pulls are free
-        remainingPulls -= 2;
-
-        // next 2 pulls cost 400 each
-        long discountedPulls = Math.min(2, remainingPulls);
-        requiredGems += discountedPulls * 400;
-        remainingPulls -= discountedPulls;
-
-        // unlimited 5-pull bundles cost 3600
-        long fivePullBundles = remainingPulls / 5;
-        requiredGems += fivePullBundles * 3600;
-        remainingPulls -= fivePullBundles * 5;
-
-        // leftover single pulls cost 800 each
-        requiredGems += remainingPulls * 800;
-
-        return requiredGems;
-    }
-
-    private List<ConsolidatedItem> calculateMilestoneRewards(long totalPulls) {
-        Map<String, Long> rewards = new HashMap<>();
-
-        if (totalPulls >= 10) {
-            rewards.merge("Epic Equipment Material Choice Chest", 2L, Long::sum);
-            rewards.merge("15-Hour Generic Speedup", 3L, Long::sum);
-        }
-
-        if (totalPulls >= 20) {
-            rewards.merge("Epic Equipment Material Choice Chest", 3L, Long::sum);
-            rewards.merge("500k Wood", 8L, Long::sum);
-            rewards.merge("500k Food", 8L, Long::sum);
-            rewards.merge("375k Stone", 8L, Long::sum);
-            rewards.merge("200k Gold", 8L, Long::sum);
-        }
-
-        if (totalPulls >= 40) {
-            rewards.merge("Legendary Equipment Material Choice Chest", 1L, Long::sum);
-            rewards.merge("Epic Equipment Material Choice Chest", 3L, Long::sum);
-            rewards.merge("24-Hour Generic Speedup", 2L, Long::sum);
-        }
-
-        if (totalPulls >= 70) {
-            rewards.merge("Legendary Equipment Material Choice Chest", 2L, Long::sum);
-            rewards.merge("24-Hour Generic Speedup", 3L, Long::sum);
-            rewards.merge("8-Hour Building Speedup", 5L, Long::sum);
-            rewards.merge("8-Hour Training Speedup", 5L, Long::sum);
-            rewards.merge("8-Hour Research Speedup", 5L, Long::sum);
-        }
-
-        if (totalPulls >= 100) {
-            rewards.merge("4-Hour Advanced Army Expansion", 2L, Long::sum);
-            rewards.merge("Legendary Equipment Material Choice Chest", 3L, Long::sum);
-        }
-
-        List<ConsolidatedItem> result = new ArrayList<>();
-
-        for (Map.Entry<String, Long> entry : rewards.entrySet()) {
-            result.add(new ConsolidatedItem(entry.getKey(), entry.getValue()));
-        }
-
-        result.sort((a, b) -> Long.compare(b.getTotalQuantity(), a.getTotalQuantity()));
-
-        return result;
-    }
-
     private EventSimulationHandler getHandlerForEvent(Event event) {
         String eventName = event.getName();
 
@@ -287,8 +171,8 @@ public class SimulationService {
             return new EsmeraldaHouseSimulationHandler();
         }
 
-        if ("Shield of the Eternal Empire".equalsIgnoreCase(eventName)) {
-            return new ShieldOfTheEternalEmpireSimulationHandler();
+        if ("Holy Knight's Treasure".equalsIgnoreCase(event.getName())) {
+            return new HolyKnightsTreasureSimulationHandler();
         }
 
         throw new IllegalArgumentException("No simulation handler configured for event: " + eventName);

@@ -27,8 +27,8 @@ public class DataInitializer {
 
                 Item item1 = itemRepository.save(new Item("8-Hour Healing Speedup x4", "Speed up healing by 4 times for 8 hours"));
                 Item item2 = itemRepository.save(new Item("8-Hour Training Speedup x4", "Speed up training by 4 times for 8 hours"));
-                Item item3 = itemRepository.save(new Item("Blueprint Fragment Choice Chest (Includes Engineering) x4", "Choice chest with blueprint fragments"));
-                Item item4 = itemRepository.save(new Item("Blueprint Fragment Choice Chest Helmet (Includes Engineering) x4", "Choice chest with helmet blueprint fragments"));
+                Item item3 = itemRepository.save(new Item("Epic Blueprint Fragment Choice Chest (Includes Engineering) x4", "Choice chest with blueprint fragments"));
+                Item item4 = itemRepository.save(new Item("Epic Blueprint Fragment Choice Chest Helmet (Includes Engineering) x4", "Choice chest with helmet blueprint fragments"));
                 Item item5 = itemRepository.save(new Item("Legendary Equipment Material Choice Chest x3", "Choice chest with legendary materials"));
                 Item item6 = itemRepository.save(new Item("Legendary Equipment Material Choice Chest x1", "Single legendary material chest"));
                 Item item7 = itemRepository.save(new Item("Epic Equipment Material Choice Chest x3", "Choice chest with epic materials"));
@@ -98,14 +98,14 @@ public class DataInitializer {
                 Item shieldFragment10 = itemRepository.save(new Item("Legendary Blueprint Fragment x10", "Shield of the Eternal Empire blueprint fragments"));
                 Item level4ResourceChest = itemRepository.save(new Item("Level 4 \"Pick One\" Resource Chest x15", "Level 4 pick one resource chest"));
                 Item speedup3h = itemRepository.save(new Item("3-Hour Speedup x5", "Generic 3-hour speedup"));
-                Item equipmentMaterialChest1 = itemRepository.save(new Item("Equipment Material Choice Chest x1", "Equipment material choice chest"));
-                Item equipmentMaterialChest3 = itemRepository.save(new Item("Equipment Material Choice Chest x3", "Equipment material choice chest"));
-                Item equipmentMaterialChest2 = itemRepository.save(new Item("Equipment Material Choice Chest x2", "Equipment material choice chest"));
+                Item equipmentMaterialChest1 = itemRepository.save(new Item("Epic Equipment Material Choice Chest x1", "Equipment material choice chest"));
+                Item equipmentMaterialChest3 = itemRepository.save(new Item("Epic Equipment Material Choice Chest x3", "Equipment material choice chest"));
+                Item equipmentMaterialChest2 = itemRepository.save(new Item("Epic Equipment Material Choice Chest x2", "Equipment material choice chest"));
                 Item researchSpeedup8h = itemRepository.save(new Item("8-Hour Research Speedup x2", "8-hour research speedup"));
                 Item buildingSpeedup8h = itemRepository.save(new Item("8-Hour Building Speedup x2", "8-hour building speedup"));
-                Item blueprintChoiceChest1 = itemRepository.save(new Item("Blueprint Fragments Choice Chest (Includes Engineering) Chest x2", "Blueprint fragments choice chest including engineering"));
-                Item blueprintChoiceChest2 = itemRepository.save(new Item("Blueprint Fragments Choice Chest (Includes Engineering) Pants x2", "Blueprint fragments choice chest including engineering"));
-                Item blueprintChoiceChest3 = itemRepository.save(new Item("Blueprint Fragments Choice Chest (Includes Engineering) Weapon x2", "Blueprint fragments choice chest including engineering"));
+                Item blueprintChoiceChest1 = itemRepository.save(new Item("Epic Blueprint Fragments Choice Chest (Includes Engineering) Chest x2", "Blueprint fragments choice chest including engineering"));
+                Item blueprintChoiceChest2 = itemRepository.save(new Item("Epic Blueprint Fragments Choice Chest (Includes Engineering) Pants x2", "Blueprint fragments choice chest including engineering"));
+                Item blueprintChoiceChest3 = itemRepository.save(new Item("Epic Blueprint Fragments Choice Chest (Includes Engineering) Weapon x2", "Blueprint fragments choice chest including engineering"));
                 Item trainingSpeedup8h = itemRepository.save(new Item("8-Hour Training Speedup x2", "8-hour training speedup"));
                 Item speedup15h = itemRepository.save(new Item("15-Hour Speedup x2", "Generic 15-hour speedup"));
 
@@ -125,34 +125,30 @@ public class DataInitializer {
                 itemDropRateRepository.save(new ItemDropRate(savedEvent, trainingSpeedup8h, 4.301));
                 itemDropRateRepository.save(new ItemDropRate(savedEvent, speedup15h, 3.225));
 
-                Item conquestBlueprintChest = itemRepository.save(new Item("Conquest Blueprint Fragment Choice Chest", "Conquest blueprint fragment choice chest"));
-                Item milestoneBlueprintChest = itemRepository.save(new Item("Blueprint Fragments Choice Chest (Includes Engineering) Weapon", "Blueprint fragments choice chest including engineering"));
+                Item conquestBlueprintChest = itemRepository.save(new Item("Conquest (Legendary) Blueprint Fragment Choice Chest", "Conquest blueprint fragment choice chest"));
+                Item milestoneBlueprintChest = itemRepository.save(new Item("Epic Blueprint Fragments Choice Chest (Includes Engineering) Weapon", "Blueprint fragments choice chest including engineering"));
                 Item milestoneSpeedup24h = itemRepository.save(new Item("24-Hour Generic Speedup", "24-hour generic speedup"));
                 Item milestoneBuilding8h = itemRepository.save(new Item("8-Hour Building Speedup", "8-hour building speedup"));
                 Item milestoneTraining8h = itemRepository.save(new Item("8-Hour Training Speedup", "8-hour training speedup"));
                 Item milestoneResearch8h = itemRepository.save(new Item("8-Hour Research Speedup", "8-hour research speedup"));
-                Item milestoneEquipmentMaterialChest = itemRepository.save(new Item("Equipment Material Choice Chest", "Equipment material choice chest"));
+                Item milestoneEquipmentMaterialChest = itemRepository.save(new Item("Epic Equipment Material Choice Chest", "Equipment material choice chest"));
                 Item food500k = itemRepository.save(new Item("500k Food", "500k food resource"));
                 Item wood500k = itemRepository.save(new Item("500k Wood", "500k wood resource"));
                 Item stone375k = itemRepository.save(new Item("375k Stone", "375k stone resource"));
                 Item gold200k = itemRepository.save(new Item("200k Gold", "200k gold resource"));
 
                 milestoneRewardRepository.save(new MilestoneReward(savedEvent, conquestBlueprintChest, 10L, 5L));
-
                 milestoneRewardRepository.save(new MilestoneReward(savedEvent, milestoneBlueprintChest, 25L, 10L));
                 milestoneRewardRepository.save(new MilestoneReward(savedEvent, milestoneSpeedup24h, 25L, 1L));
                 milestoneRewardRepository.save(new MilestoneReward(savedEvent, milestoneBuilding8h, 25L, 3L));
                 milestoneRewardRepository.save(new MilestoneReward(savedEvent, milestoneTraining8h, 25L, 3L));
                 milestoneRewardRepository.save(new MilestoneReward(savedEvent, milestoneResearch8h, 25L, 3L));
-
                 milestoneRewardRepository.save(new MilestoneReward(savedEvent, conquestBlueprintChest, 45L, 6L));
-
                 milestoneRewardRepository.save(new MilestoneReward(savedEvent, milestoneEquipmentMaterialChest, 70L, 12L));
                 milestoneRewardRepository.save(new MilestoneReward(savedEvent, food500k, 70L, 5L));
                 milestoneRewardRepository.save(new MilestoneReward(savedEvent, wood500k, 70L, 5L));
                 milestoneRewardRepository.save(new MilestoneReward(savedEvent, stone375k, 70L, 5L));
                 milestoneRewardRepository.save(new MilestoneReward(savedEvent, gold200k, 70L, 5L));
-
                 milestoneRewardRepository.save(new MilestoneReward(savedEvent, conquestBlueprintChest, 100L, 9L));
             }
         };

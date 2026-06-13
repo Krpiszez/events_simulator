@@ -2,18 +2,18 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <title>RoK Events Simulator</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rok Events Simulator</title>
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
     <style>
         :root {
             --primary: #6f42c1;
-            --secondary: #6c757d;
-            --success: #198754;
-            --danger: #dc3545;
-            --warning: #ffc107;
-            --info: #0dcaf0;
+            --secondary: #667eea;
+            --dark: #15172b;
+            --card-bg: rgba(255, 255, 255, 0.92);
         }
 
         * {
@@ -21,670 +21,269 @@
         }
 
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            padding: 30px 15px;
+            background:
+                    radial-gradient(circle at top left, rgba(255, 215, 0, 0.25), transparent 30%),
+                    radial-gradient(circle at bottom right, rgba(111, 66, 193, 0.35), transparent 35%),
+                    linear-gradient(135deg, #141E30 0%, #243B55 100%);
+            color: white;
+            overflow-x: hidden;
         }
 
-        .container-wrapper {
-            max-width: 1200px;
+        .page-wrapper {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 60px 15px;
+        }
+
+        .hero {
+            text-align: center;
+            margin-bottom: 50px;
+            animation: fadeDown 0.8s ease;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            padding: 8px 18px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.14);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            font-size: 0.9rem;
+            margin-bottom: 18px;
+            backdrop-filter: blur(10px);
+        }
+
+        .hero h1 {
+            font-size: clamp(2.4rem, 5vw, 4.5rem);
+            font-weight: 800;
+            letter-spacing: -1px;
+            margin-bottom: 15px;
+        }
+
+        .hero p {
+            font-size: 1.15rem;
+            color: rgba(255, 255, 255, 0.75);
+            max-width: 650px;
             margin: 0 auto;
         }
 
-        .header {
-            text-align: center;
-            margin-bottom: 40px;
-            color: white;
-        }
-
-        .header h1 {
-            font-size: 2.5rem;
-            font-weight: bold;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-        }
-
-        .header p {
-            font-size: 1.1rem;
-            opacity: 0.9;
-        }
-
-        .card {
+        .event-card {
+            position: relative;
+            height: 100%;
             border: none;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            border-radius: 24px;
+            padding: 28px;
+            background: var(--card-bg);
+            color: #222;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
+            animation: fadeUp 0.9s ease;
         }
 
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+        .event-card:hover {
+            transform: translateY(-12px) scale(1.01);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
         }
 
-        .form-card {
-            background: white;
-            margin-bottom: 30px;
+        .event-card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(111, 66, 193, 0.12), rgba(255, 215, 0, 0.12));
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
 
-        .form-group label {
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 8px;
+        .event-card:hover::before {
+            opacity: 1;
         }
 
-        .form-control {
-            border: 2px solid #e9ecef;
-            border-radius: 8px;
-            padding: 10px 15px;
-            transition: border-color 0.3s ease;
+        .event-content {
+            position: relative;
+            z-index: 2;
         }
 
-        .form-control:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 0.2rem rgba(111, 66, 193, 0.25);
-        }
-
-        .btn-simulate {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
+        .event-icon {
+            width: 62px;
+            height: 62px;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
             color: white;
+            margin-bottom: 22px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.35);
+        }
+
+        .event-card.gold .event-icon {
+            background: linear-gradient(135deg, #f7971e 0%, #ffd200 100%);
+            color: #2d2200;
+        }
+
+        .event-card h4 {
+            font-weight: 800;
+            margin-bottom: 12px;
+        }
+
+        .event-card p {
+            color: #666;
+            min-height: 50px;
+            margin-bottom: 22px;
+        }
+
+        .event-meta {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+        }
+
+        .meta-pill {
+            font-size: 0.8rem;
+            padding: 6px 12px;
+            border-radius: 999px;
+            background: #f1f3f5;
+            color: #495057;
             font-weight: 600;
-            padding: 12px 40px;
-            border-radius: 8px;
+        }
+
+        .btn-open {
+            width: 100%;
+            border: none;
+            border-radius: 14px;
+            padding: 13px 18px;
+            font-weight: 700;
+            color: white;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
 
-        .btn-simulate:hover {
+        .btn-open:hover {
             color: white;
-            transform: scale(1.05);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 25px rgba(102, 126, 234, 0.4);
         }
 
-        .btn-simulate:active {
-            transform: scale(0.98);
+        .btn-open.gold {
+            background: linear-gradient(135deg, #f7971e 0%, #ffd200 100%);
+            color: #2d2200;
         }
 
-        .btn-simulate:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
-        .results-section {
-            margin-top: 30px;
-        }
-
-        .section-title {
-            font-size: 1.4rem;
-            font-weight: bold;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 3px solid var(--primary);
-            color: #333;
-        }
-
-        .stats-row {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 25px;
-        }
-
-        .stat-box {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px;
-            border-radius: 10px;
+        .footer-note {
             text-align: center;
+            margin-top: 40px;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.95rem;
         }
 
-        .stat-label {
-            font-size: 0.9rem;
-            opacity: 0.8;
-            margin-bottom: 8px;
+        @keyframes fadeDown {
+            from {
+                opacity: 0;
+                transform: translateY(-18px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
-        .stat-value {
-            font-size: 1.8rem;
-            font-weight: bold;
-        }
-
-        .table-container {
-            overflow-x: auto;
-        }
-
-        table {
-            margin-bottom: 0;
-        }
-
-        table thead {
-            background-color: var(--primary);
-            color: white;
-        }
-
-        table tbody tr {
-            transition: background-color 0.2s ease;
-        }
-
-        table tbody tr:hover {
-            background-color: #f8f9fa;
-        }
-
-        table td {
-            vertical-align: middle;
-            padding: 12px;
-        }
-
-        .progress-bar {
-            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-            height: 8px;
-            border-radius: 4px;
-        }
-
-        .item-badge {
-            display: inline-block;
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            font-weight: 500;
-        }
-
-        .badge-legendary {
-            background: #ffd700;
-            color: #333;
-        }
-
-        .badge-epic {
-            background: #9b59b6;
-            color: white;
-        }
-
-        .badge-rare {
-            background: #3498db;
-            color: white;
-        }
-
-        .badge-common {
-            background: #95a5a6;
-            color: white;
-        }
-
-        .loading-spinner {
-            text-align: center;
-            padding: 40px;
-        }
-
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid rgba(102, 126, 234, 0.2);
-            border-top: 5px solid var(--primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .alert-error {
-            background-color: #f8d7da;
-            border: 1px solid #f5c6cb;
-            color: #721c24;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 20px;
-        }
-
-        .alert-success {
-            background-color: #d4edda;
-            border: 1px solid #c3e6cb;
-            color: #155724;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 20px;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: #999;
-        }
-
-        .empty-state i {
-            font-size: 3rem;
-            margin-bottom: 20px;
-            opacity: 0.5;
-        }
-
-        .empty-state p {
-            font-size: 1.1rem;
-            margin: 0;
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(28px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         @media (max-width: 768px) {
-            .header h1 {
-                font-size: 1.8rem;
+            .page-wrapper {
+                padding: 40px 12px;
             }
 
-            .stats-row {
-                grid-template-columns: 1fr;
-            }
-
-            .section-title {
-                font-size: 1.1rem;
+            .event-card {
+                padding: 24px;
             }
         }
     </style>
 </head>
+
 <body>
-    <div class="container-wrapper">
-        <!-- Header -->
-        <div class="header">
-            <h1><i class="fas fa-gem"></i> Rok Events Simulator</h1>
-            <p>Esmeralda's House - Gem Spending Simulator</p>
+<div class="page-wrapper">
+    <div class="container">
+
+        <div class="hero">
+            <div class="hero-badge">
+                <i class="fas fa-dice"></i> Rise of Kingdoms Event Simulator
+            </div>
+            <h1>Choose Your Event</h1>
+            <p>
+                Pick an event, enter your gems or pull count, and instantly simulate expected rewards,
+                milestone bonuses, and drop outcomes.
+            </p>
         </div>
 
-        <!-- Form Card -->
-        <div class="card form-card">
-            <div class="card-body p-4">
-                <h5 class="card-title mb-4"><i class="fas fa-cog"></i> Simulation Configuration</h5>
+        <div class="row g-4 justify-content-center">
 
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="eventId" class="form-label">Event ID</label>
-                        <input type="number" class="form-control" id="eventId" value="1" min="1" placeholder="Enter event ID">
-                        <small class="text-muted">Default: 1 (Esmeralda's House)</small>
+            <div class="col-md-6 col-lg-5">
+                <div class="event-card">
+                    <div class="event-content">
+                        <div class="event-icon">
+                            <i class="fas fa-gem"></i>
+                        </div>
+
+                        <h4>Esmeralda's House</h4>
+                        <p>Run gem and pull simulations for Esmeralda's House rewards.</p>
+
+                        <div class="event-meta">
+                            <span class="meta-pill">Free pulls</span>
+                            <span class="meta-pill">Milestones</span>
+                            <span class="meta-pill">Gem simulator</span>
+                        </div>
+
+                        <a href="simulator.html?eventId=1&eventName=Esmeralda%27s%20House" class="btn btn-open">
+                            Open Simulator <i class="fas fa-arrow-right ms-2"></i>
+                        </a>
                     </div>
-
-                    <div class="col-md-6 mb-3">
-                        <label for="simulationMode" class="form-label">Simulation Method</label>
-                        <select class="form-control" id="simulationMode" onchange="toggleSimulationMode()">
-                            <option value="gems">Calculate by Gems</option>
-                            <option value="pulls">Calculate by Pulls</option>
-                        </select>
-                    </div>
-
-                    <div class="col-md-6 mb-3" id="gemInputGroup">
-                        <label for="gemAmount" class="form-label">Gem Amount</label>
-                        <input type="number" class="form-control" id="gemAmount" value="8000" min="0" placeholder="Enter gem amount">
-                        <small class="text-muted">Enter any gem amount. Leftover gems will be shown.</small>
-                    </div>
-
-                    <div class="col-md-6 mb-3" id="pullInputGroup" style="display: none;">
-                        <label for="pullCount" class="form-label">Pull Count</label>
-                        <input type="number" class="form-control" id="pullCount" value="50" min="1" placeholder="Enter pull count">
-                        <small class="text-muted">Enter how many pulls you want. Required gems will be calculated.</small>
-                    </div>
-                </div>
-
-                <div class="d-flex gap-2">
-                    <button class="btn btn-simulate" id="simulateBtn" onclick="runSimulation()">
-                        <i class="fas fa-play"></i> Run Simulation
-                    </button>
-                    <button class="btn btn-secondary" onclick="clearResults()">
-                        <i class="fas fa-trash"></i> Clear
-                    </button>
                 </div>
             </div>
+
+            <div class="col-md-6 col-lg-5">
+                <div class="event-card gold">
+                    <div class="event-content">
+                        <div class="event-icon">
+                            <i class="fas fa-shield-halved"></i>
+                        </div>
+
+                        <h4>Holy Knight's Treasure</h4>
+                        <p>Simulate Holy Knight's Treasure pulls, costs, and conquest blueprint rewards.</p>
+
+                        <div class="event-meta">
+                            <span class="meta-pill">2-day event</span>
+                            <span class="meta-pill">Max 180 pulls</span>
+                            <span class="meta-pill">Blueprint rewards</span>
+                        </div>
+
+                        <a href="simulator.html?eventId=2&eventName=Holy%20Knight%27s%20Treasure" class="btn btn-open gold">
+                            Open Simulator <i class="fas fa-arrow-right ms-2"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
         </div>
 
-        <!-- Results Section -->
-        <div id="resultsContainer" style="display: none;" class="results-section">
-            <!-- Loading State -->
-            <div id="loadingState" style="display: none;">
-                <div class="card">
-                    <div class="card-body loading-spinner">
-                        <div class="spinner"></div>
-                        <p class="mt-3">Running 1000 simulations...</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Error State -->
-            <div id="errorState" style="display: none;">
-                <div class="alert-error" id="errorMessage"></div>
-            </div>
-
-            <!-- Success State -->
-            <div id="successState" style="display: none;">
-                <!-- Stats Cards -->
-                <div class="stats-row">
-                    <div class="stat-box">
-                        <div class="stat-label">Event</div>
-                        <div class="stat-value" id="statEvent">-</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="stat-label">Gems Spent</div>
-                        <div class="stat-value" id="statGems">-</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="stat-label">Total Pulls</div>
-                        <div class="stat-value" id="statPulls">-</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="stat-label">Leftover Gems</div>
-                        <div class="stat-value" id="statLeftover">-</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="stat-label">Simulations</div>
-                        <div class="stat-value">1,000</div>
-                    </div>
-                </div>
-
-                <div class="card mb-4">
-                    <div class="card-body">
-                        <h5 class="section-title"><i class="fas fa-gift"></i>Total Milestone Rewards</h5>
-                        <div class="table-container">
-                            <table class="table">
-                                <thead>
-                                <tr>
-                                    <th>Reward</th>
-                                    <th class="text-end">Total Quantity</th>
-                                </tr>
-                                </thead>
-                                <tbody id="milestoneBody">
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Consolidated Items -->
-                <div class="card mb-4">
-                    <div class="card-body">
-                        <h5 class="section-title"><i class="fas fa-cube"></i> Consolidated Items (Expected)</h5>
-                        <div id="consolidatedTable">
-                            <div class="table-container">
-                                <table class="table">
-                                    <thead>
-                                        <tr>
-                                            <th>Item Name</th>
-                                            <th class="text-end">Total Quantity</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="consolidatedBody">
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Expected Items (Detailed) -->
-                <div class="card mb-4">
-                    <div class="card-body">
-                        <h5 class="section-title"><i class="fas fa-list"></i> Expected Items (Detailed)</h5>
-                        <div id="expectedTable">
-                            <div class="table-container">
-                                <table class="table">
-                                    <thead>
-                                        <tr>
-                                            <th>Item Name</th>
-                                            <th class="text-end">Expected Count</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="expectedBody">
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Simulation Results (Percentages) -->
-                <div class="card mb-4">
-                    <div class="card-body">
-                        <h5 class="section-title"><i class="fas fa-chart-bar"></i> Simulation Results (Drop Percentages)</h5>
-                        <div id="resultsTable">
-                            <div class="table-container">
-                                <table class="table">
-                                    <thead>
-                                        <tr>
-                                            <th>Item Name</th>
-                                            <th class="text-center">Count</th>
-                                            <th class="text-center">Percentage</th>
-                                            <th class="text-end">Visualization</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="resultsBody">
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Empty State -->
-            <div id="emptyState">
-                <div class="card">
-                    <div class="card-body empty-state">
-                        <i class="fas fa-inbox"></i>
-                        <p>Click "Run Simulation" to see results here</p>
-                    </div>
-                </div>
-            </div>
+        <div class="footer-note">
+            More events can be added later using the same simulator structure.
         </div>
+
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        const API_BASE = 'http://localhost:8080/api/events/simulate';
-
-        function formatNumber(num) {
-            return new Intl.NumberFormat('en-US').format(num);
-        }
-
-        function getItemBadge(itemName) {
-            const lower = itemName.toLowerCase();
-            if (lower.includes('legendary')) {
-                return 'badge-legendary';
-            } else if (lower.includes('epic')) {
-                return 'badge-epic';
-            } else if (lower.includes('rare')) {
-                return 'badge-rare';
-            }
-            return 'badge-common';
-        }
-
-        async function runSimulation() {
-            const eventId = document.getElementById('eventId').value;
-            const simulationMode = document.getElementById('simulationMode').value;
-            const gemAmount = document.getElementById('gemAmount').value;
-            const pullCount = document.getElementById('pullCount').value;
-
-            // Validation
-            if (!eventId || eventId < 1) {
-                showError('Please enter a valid Event ID');
-                return;
-            }
-
-            let requestBody = {
-                eventId: parseInt(eventId)
-            };
-
-            if (simulationMode === 'gems') {
-                if (gemAmount === '' || gemAmount < 0) {
-                    showError('Please enter a valid gem amount');
-                    return;
-                }
-
-                requestBody.gemAmount = parseInt(gemAmount);
-            }
-
-            if (simulationMode === 'pulls') {
-                if (!pullCount || pullCount < 1) {
-                    showError('Please enter a valid pull count');
-                    return;
-                }
-
-                requestBody.pullCount = parseInt(pullCount);
-            }
-
-            showLoading();
-
-            try {
-                const response = await fetch(API_BASE, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(requestBody)
-                });
-
-                if (!response.ok) {
-                    const error = await response.json();
-                    throw new Error(error.message || 'Simulation failed');
-                }
-
-                const data = await response.json();
-                displayResults(data);
-            } catch (error) {
-                showError('Error: ' + error.message);
-            }
-        }
-
-        function toggleSimulationMode() {
-            const mode = document.getElementById('simulationMode').value;
-
-            document.getElementById('gemInputGroup').style.display =
-                mode === 'gems' ? 'block' : 'none';
-
-            document.getElementById('pullInputGroup').style.display =
-                mode === 'pulls' ? 'block' : 'none';
-        }
-
-        function displayResults(data) {
-            // Stats
-            document.getElementById('statEvent').textContent = data.eventName || 'Esmeralda\'s House';
-            document.getElementById('statGems').textContent = formatNumber(data.gemSpent) + ' 💎';
-            document.getElementById('statPulls').textContent = formatNumber(data.totalPulls);
-            document.getElementById('statLeftover').textContent = formatNumber(data.leftoverGems);
-
-            const milestoneBody = document.getElementById('milestoneBody');
-            milestoneBody.innerHTML = '';
-
-            if (data.milestoneRewards && data.milestoneRewards.length > 0) {
-                data.milestoneRewards.forEach(reward => {
-                    const badgeClass = getItemBadge(reward.itemName);
-
-                    milestoneBody.innerHTML += `
-                    <tr>
-                        <td>
-                            <span class="item-badge ${badgeClass}">
-                                ${reward.itemName}
-                            </span>
-                        </td>
-                        <td class="text-end">
-                            <strong>${formatNumber(reward.totalQuantity)}</strong>
-                        </td>
-                    </tr>
-                `;
-                });
-            } else {
-                milestoneBody.innerHTML =
-                    '<tr><td colspan="3" class="text-center text-muted">No milestone rewards reached</td></tr>';
-            }
-
-            // Consolidated Items
-            const consolidatedBody = document.getElementById('consolidatedBody');
-            consolidatedBody.innerHTML = '';
-            if (data.consolidatedItems && data.consolidatedItems.length > 0) {
-                data.consolidatedItems.forEach(item => {
-                    const badgeClass = getItemBadge(item.itemName);
-                    consolidatedBody.innerHTML += `
-                        <tr>
-                            <td><span class="item-badge ${badgeClass}">${item.itemName}</span></td>
-                            <td class="text-end"><strong>${formatNumber(item.totalQuantity)}</strong></td>
-                        </tr>
-                    `;
-                });
-            } else {
-                consolidatedBody.innerHTML = '<tr><td colspan="2" class="text-center text-muted">No items in this range</td></tr>';
-            }
-
-            // Expected Items
-            const expectedBody = document.getElementById('expectedBody');
-            expectedBody.innerHTML = '';
-            if (data.expectedItems && data.expectedItems.length > 0) {
-                data.expectedItems.forEach(item => {
-                    const badgeClass = getItemBadge(item.itemName);
-                    expectedBody.innerHTML += `
-                        <tr>
-                            <td><span class="item-badge ${badgeClass}">${item.itemName}</span></td>
-                            <td class="text-end"><strong>${formatNumber(item.expectedCount)}</strong></td>
-                        </tr>
-                    `;
-                });
-            }
-
-            // Results
-            const resultsBody = document.getElementById('resultsBody');
-            resultsBody.innerHTML = '';
-            if (data.results && data.results.length > 0) {
-                data.results.forEach(item => {
-                    const badgeClass = getItemBadge(item.itemName);
-                    const barWidth = Math.max(item.percentage * 2, 5);
-                    resultsBody.innerHTML += `
-                        <tr>
-                            <td><span class="item-badge ${badgeClass}">${item.itemName}</span></td>
-                            <td class="text-center">${formatNumber(item.count)}</td>
-                            <td class="text-center"><strong>${item.percentage.toFixed(4)}%</strong></td>
-                            <td>
-                                <div style="width: 100%; background: #e9ecef; border-radius: 4px; overflow: hidden;">
-                                    <div class="progress-bar" style="width: ${barWidth}%; min-height: 20px;"></div>
-                                </div>
-                            </td>
-                        </tr>
-                    `;
-                });
-            }
-
-            showSuccess();
-        }
-
-        function showLoading() {
-            document.getElementById('resultsContainer').style.display = 'block';
-            document.getElementById('loadingState').style.display = 'block';
-            document.getElementById('errorState').style.display = 'none';
-            document.getElementById('successState').style.display = 'none';
-            document.getElementById('emptyState').style.display = 'none';
-            document.getElementById('simulateBtn').disabled = true;
-        }
-
-        function showSuccess() {
-            document.getElementById('loadingState').style.display = 'none';
-            document.getElementById('errorState').style.display = 'none';
-            document.getElementById('successState').style.display = 'block';
-            document.getElementById('emptyState').style.display = 'none';
-            document.getElementById('simulateBtn').disabled = false;
-        }
-
-        function showError(message) {
-            document.getElementById('resultsContainer').style.display = 'block';
-            document.getElementById('loadingState').style.display = 'none';
-            document.getElementById('errorState').style.display = 'block';
-            document.getElementById('successState').style.display = 'none';
-            document.getElementById('emptyState').style.display = 'none';
-            document.getElementById('errorMessage').textContent = message;
-            document.getElementById('simulateBtn').disabled = false;
-        }
-
-        function clearResults() {
-            document.getElementById('resultsContainer').style.display = 'none';
-            document.getElementById('eventId').value = '1';
-            document.getElementById('gemAmount').value = '8000';
-        }
-
-        // Allow Enter key to run simulation
-        document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('gemAmount').addEventListener('keypress', function(event) {
-                if (event.key === 'Enter') {
-                    runSimulation();
-                }
-            });
-        });
-    </script>
+</div>
 </body>
 </html>

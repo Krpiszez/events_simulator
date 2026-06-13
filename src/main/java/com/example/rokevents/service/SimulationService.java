@@ -3,8 +3,10 @@ package com.example.rokevents.service;
 import com.example.rokevents.dto.*;
 import com.example.rokevents.entity.Event;
 import com.example.rokevents.entity.ItemDropRate;
+import com.example.rokevents.entity.MilestoneReward;
 import com.example.rokevents.repository.EventRepository;
 import com.example.rokevents.repository.ItemDropRateRepository;
+import com.example.rokevents.repository.MilestoneRewardRepository;
 import com.example.rokevents.util.EventSimulationHandler;
 import com.example.rokevents.util.PullCalculation;
 import com.example.rokevents.util.impl.EsmeraldaHouseSimulationHandler;
@@ -25,6 +27,9 @@ public class SimulationService {
 
     @Autowired
     private ItemDropRateRepository itemDropRateRepository;
+
+    @Autowired
+    private MilestoneRewardRepository milestoneRewardRepository;
 
     public SimulationResponse simulate(SimulationRequest request) {
 
@@ -48,7 +53,8 @@ public class SimulationService {
             gemSpent = request.getGemAmount();
         }
 
-        List<ConsolidatedItem> milestoneRewards = handler.calculateMilestoneRewards(totalPulls);
+        List<ConsolidatedItem> milestoneRewards =
+                calculateMilestoneRewardsFromRepository(event.getId(), totalPulls);
 
         List<ItemDropRate> dropRates = itemDropRateRepository.findByEventId(event.getId());
         if (dropRates.isEmpty()) {
@@ -176,5 +182,29 @@ public class SimulationService {
         }
 
         throw new IllegalArgumentException("No simulation handler configured for event: " + eventName);
+    }
+
+    private List<ConsolidatedItem> calculateMilestoneRewardsFromRepository(Long eventId, long totalPulls) {
+        List<MilestoneReward> rewards =
+                milestoneRewardRepository.findByEventIdAndMilestoneLessThanEqual(eventId, totalPulls);
+
+        Map<String, Long> rewardMap = new HashMap<>();
+
+        for (MilestoneReward reward : rewards) {
+            String itemName = reward.getItem().getName();
+            Long quantity = reward.getQuantity();
+
+            rewardMap.merge(itemName, quantity, Long::sum);
+        }
+
+        List<ConsolidatedItem> result = new ArrayList<>();
+
+        for (Map.Entry<String, Long> entry : rewardMap.entrySet()) {
+            result.add(new ConsolidatedItem(entry.getKey(), entry.getValue()));
+        }
+
+        result.sort((a, b) -> Long.compare(b.getTotalQuantity(), a.getTotalQuantity()));
+
+        return result;
     }
 }

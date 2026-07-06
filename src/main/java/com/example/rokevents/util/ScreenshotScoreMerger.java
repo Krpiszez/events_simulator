@@ -73,9 +73,14 @@ public class ScreenshotScoreMerger {
                 if (file.isFile() && (file.getName().endsWith(".png") || file.getName().endsWith(".jpg") || file.getName().endsWith(".jpeg"))) {
                     System.out.println("Scanning image: " + file.getName());
                     try {
-                        String resultText = tesseract.doOCR(file);
+                        // PREPROCESSING: Enhance the image size and contrast for Tesseract
+                        java.awt.image.BufferedImage originalImage = javax.imageio.ImageIO.read(file);
+                        java.awt.image.BufferedImage enhancedImage = preprocessImage(originalImage);
+
+                        // Run OCR on the enhanced image instead of the raw file
+                        String resultText = tesseract.doOCR(enhancedImage);
                         parseScoresFromText(resultText, extractedPlayerScores);
-                    } catch (TesseractException e) {
+                    } catch (TesseractException | IOException e) {
                         System.err.println("Could not read image " + file.getName() + ": " + e.getMessage());
                     }
                 }
@@ -196,5 +201,30 @@ public class ScreenshotScoreMerger {
                 }
             }
         }
+    }
+
+    /**
+     * Resizes the image to 2x its original size and converts it to grayscale.
+     * This makes thin, small fonts (like 'ethan') much easier for Tesseract to anchor.
+     */
+    private static java.awt.image.BufferedImage preprocessImage(java.awt.image.BufferedImage originalImage) {
+        int newWidth = originalImage.getWidth() * 2;
+        int newHeight = originalImage.getHeight() * 2;
+
+        // Create a new high-quality grayscale image buffer
+        java.awt.image.BufferedImage processed = new java.awt.image.BufferedImage(
+                newWidth, newHeight, java.awt.image.BufferedImage.TYPE_BYTE_GRAY);
+
+        java.awt.Graphics2D g2d = processed.createGraphics();
+
+        // Use high quality rendering hints for interpolation
+        g2d.setRenderingHint(java.awt.RenderingHints.KEY_INTERPOLATION,
+                java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+
+        // Draw the original image upscaled into the grayscale layout
+        g2d.drawImage(originalImage, 0, 0, newWidth, newHeight, null);
+        g2d.dispose();
+
+        return processed;
     }
 }

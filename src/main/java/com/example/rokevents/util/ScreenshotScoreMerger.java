@@ -124,7 +124,7 @@ public class ScreenshotScoreMerger {
         }
 
         // ==========================================
-        // REVISED STEP 5: Safe Output Writing
+        // REVISED STEP 5: Safe Output Writing (Only Main Rows Get Scores)
         // ==========================================
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(outputFilePath))) {
             bw.write("Governor ID,Owner,Status,Screenshot Individual Score,Total Combined Score\n");
@@ -138,14 +138,14 @@ public class ScreenshotScoreMerger {
                         .append(record.owner).append(",")
                         .append(record.status).append(",");
 
-                // Display the individual captured score for all accounts under this owner
-                sb.append(indScore).append(",");
-
-                // Display the aggregated main+farm score ONLY on the row marked 'main'
+                // Only print scores if this is the main account row
                 if (record.status.equalsIgnoreCase("main")) {
-                    sb.append(totalScore);
+                    sb.append(indScore).append(",")
+                            .append(totalScore);
                 } else {
-                    sb.append("");
+                    // Leaves both individual score and total score completely blank for farm rows
+                    sb.append(",")
+                            .append("");
                 }
 
                 bw.write(sb.toString());

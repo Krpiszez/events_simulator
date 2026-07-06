@@ -181,7 +181,7 @@ public class ScreenshotScoreMerger {
             // REVISED REGEX FOR THE IMAGE LAYOUT:
             // Match any character string (the name), followed by a number with commas (the score),
             // followed by a fraction sequence like 6/6 or 2/3 (the turned in column).
-            Pattern pattern = Pattern.compile("(.+?)\\s+([0-9,]+)\\s+(\\d+/\\d+)");
+            Pattern pattern = Pattern.compile("(.+?)\\s+([0-9,]+)\\s+(\\d+(?:/\\d+)?)");
             Matcher matcher = pattern.matcher(trimmedLine);
 
             if (matcher.find()) {

@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>File Processing - RoK Events</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #6f42c1;
+            --secondary: #667eea;
+            --dark: #15172b;
+            --card-bg: rgba(255, 255, 255, 0.92);
+        }
+
+        * {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background:
+                    radial-gradient(circle at top left, rgba(255, 215, 0, 0.25), transparent 30%),
+                    radial-gradient(circle at bottom right, rgba(111, 66, 193, 0.35), transparent 35%),
+                    linear-gradient(135deg, #141E30 0%, #243B55 100%);
+            color: white;
+            overflow-x: hidden;
+        }
+
+        .container-wrapper {
+            min-height: 100vh;
+            padding: 40px 15px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+            animation: fadeDown 0.8s ease;
+        }
+
+        .header-badge {
+            display: inline-block;
+            padding: 8px 18px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.14);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            font-size: 0.9rem;
+            margin-bottom: 18px;
+            backdrop-filter: blur(10px);
+        }
+
+        .header h1 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 800;
+            letter-spacing: -1px;
+            margin-bottom: 15px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.75);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .processing-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+
+        .processing-card {
+            position: relative;
+            border: none;
+            border-radius: 24px;
+            padding: 32px;
+            background: var(--card-bg);
+            color: #222;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            animation: fadeUp 0.9s ease;
+        }
+
+        .processing-card:hover {
+            transform: translateY(-12px) scale(1.01);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+        }
+
+        .processing-card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(111, 66, 193, 0.12), rgba(255, 215, 0, 0.12));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .processing-card:hover::before {
+            opacity: 1;
+        }
+
+        .card-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .card-icon {
+            width: 62px;
+            height: 62px;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            color: white;
+            margin-bottom: 22px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.35);
+        }
+
+        .processing-card h3 {
+            font-weight: 800;
+            margin-bottom: 12px;
+            font-size: 1.4rem;
+        }
+
+        .processing-card p {
+            color: #666;
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+
+        .form-group-custom {
+            margin-bottom: 20px;
+        }
+
+        .form-group-custom label {
+            font-weight: 600;
+            color: #222;
+            margin-bottom: 8px;
+            display: block;
+            font-size: 0.95rem;
+        }
+
+        .form-control-custom {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            background: white;
+            color: #222;
+        }
+
+        .form-control-custom:focus {
+            outline: none;
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            border-radius: 10px;
+        }
+
+        .file-input-wrapper input[type="file"] {
+            position: absolute;
+            left: -9999px;
+        }
+
+        .file-input-label {
+            display: block;
+            padding: 12px 16px;
+            background: #f5f5f5;
+            border: 2px dashed #ddd;
+            border-radius: 10px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s ease;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .file-input-label:hover {
+            border-color: var(--secondary);
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .file-input-wrapper input[type="file"]:focus + .file-input-label {
+            border-color: var(--secondary);
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .selected-file {
+            margin-top: 8px;
+            padding: 8px 12px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 6px;
+            font-size: 0.85rem;
+            color: var(--secondary);
+        }
+
+        .btn-submit {
+            width: 100%;
+            border: none;
+            border-radius: 12px;
+            padding: 14px 24px;
+            font-weight: 700;
+            color: white;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-top: 10px;
+        }
+
+        .btn-submit:hover:not(:disabled) {
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 12px 25px rgba(102, 126, 234, 0.4);
+            text-decoration: none;
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .spinner-border-sm {
+            width: 1rem;
+            height: 1rem;
+            margin-right: 8px;
+        }
+
+        .results-container {
+            margin-top: 50px;
+        }
+
+        .results-card {
+            border: none;
+            border-radius: 24px;
+            padding: 32px;
+            background: var(--card-bg);
+            color: #222;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+            animation: fadeUp 0.9s ease;
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .results-header h3 {
+            font-weight: 800;
+            font-size: 1.4rem;
+            margin: 0;
+        }
+
+        .download-btn {
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: none;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            cursor: pointer;
+            font-weight: 600;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+            color: white;
+            text-decoration: none;
+        }
+
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 16px;
+            overflow-x: auto;
+        }
+
+        .results-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 14px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+            transition: background 0.2s ease;
+        }
+
+        .results-table th:hover {
+            background: linear-gradient(135deg, #7a8eeb 0%, #876fb2 100%);
+        }
+
+        .results-table th.sortable::after {
+            content: " ↕";
+            opacity: 0.5;
+            font-size: 0.8rem;
+        }
+
+        .results-table th.sort-asc::after {
+            content: " ↑";
+            opacity: 1;
+        }
+
+        .results-table th.sort-desc::after {
+            content: " ↓";
+            opacity: 1;
+        }
+
+        .filter-row {
+            background: rgba(102, 126, 234, 0.08);
+            border-bottom: 2px solid rgba(102, 126, 234, 0.2);
+        }
+
+        .filter-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            background: white;
+            color: #222;
+            box-sizing: border-box;
+        }
+
+        .filter-input:focus {
+            outline: none;
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+        }
+
+        .filter-icon {
+            font-size: 0.8rem;
+            opacity: 0.6;
+            margin-left: 4px;
+        }
+
+        .clear-filters-btn {
+            padding: 8px 16px;
+            margin-top: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .clear-filters-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .filter-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+
+        .filter-status {
+            font-size: 0.85rem;
+            color: #666;
+            font-style: italic;
+        }
+
+        .results-table td {
+            padding: 12px 14px;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 0.9rem;
+        }
+
+        .results-table tr:hover {
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .alert-message {
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-weight: 500;
+            display: none;
+        }
+
+        .alert-success {
+            background: rgba(76, 175, 80, 0.1);
+            color: #2e7d32;
+            border: 1px solid rgba(76, 175, 80, 0.3);
+        }
+
+        .alert-error {
+            background: rgba(244, 67, 54, 0.1);
+            color: #c62828;
+            border: 1px solid rgba(244, 67, 54, 0.3);
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .text-muted-custom {
+            color: #999;
+            font-size: 0.9rem;
+            margin-top: 8px;
+        }
+
+        @keyframes fadeDown {
+            from {
+                opacity: 0;
+                transform: translateY(-18px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(28px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container-wrapper {
+                padding: 25px 12px;
+            }
+
+            .processing-container {
+                grid-template-columns: 1fr;
+            }
+
+            .processing-card {
+                padding: 24px;
+            }
+
+            .results-card {
+                padding: 24px;
+            }
+
+            .results-table {
+                font-size: 0.8rem;
+            }
+
+            .results-table th, .results-table td {
+                padding: 8px;
+            }
+        }
+
+        .back-link {
+            display: inline-block;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            margin-bottom: 30px;
+            transition: color 0.3s ease;
+        }
+
+        .back-link:hover {
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+<div class="container-wrapper">
+    <div class="container">
+        <a href="index.html" class="back-link">
+            <i class="fas fa-arrow-left"></i> Back to Home
+        </a>
+
+        <div class="header">
+            <div class="header-badge">
+                <i class="fas fa-file-csv"></i> File Processing
+            </div>
+            <h1>Process Your Files</h1>
+            <p>Upload CSV files and screenshots to merge scores, calculate totals, and extract results.</p>
+        </div>
+
+        <div class="processing-container">
+            <!-- Screenshot Merger Card -->
+            <div class="processing-card">
+                <div class="card-content">
+                    <div class="card-icon">
+                        <i class="fas fa-images"></i>
+                    </div>
+
+                    <h3>Screenshot Score Merger</h3>
+                    <p>Extract scores from screenshot images using OCR and merge with governor data.</p>
+
+                    <form id="screenshotForm">
+                        <div class="form-group-custom">
+                            <label for="detailsFile">Details CSV File *</label>
+                            <div class="file-input-wrapper">
+                                <input type="file" id="detailsFile" name="detailsFile" accept=".csv" required>
+                                <label for="detailsFile" class="file-input-label">
+                                    <i class="fas fa-upload"></i> Choose Details CSV
+                                </label>
+                            </div>
+                            <div class="selected-file" id="detailsFileName"></div>
+                            <div class="text-muted-custom">Format: Governor ID, Owner, Status</div>
+                        </div>
+
+                        <div class="form-group-custom">
+                            <label for="screenshotZip">Screenshots (ZIP or Images) *</label>
+                            <div class="file-input-wrapper">
+                                <input type="file" id="screenshotZip" name="screenshotZip" accept=".zip,.png,.jpg,.jpeg" required>
+                                <label for="screenshotZip" class="file-input-label">
+                                    <i class="fas fa-upload"></i> Choose Screenshot File(s)
+                                </label>
+                            </div>
+                            <div class="selected-file" id="screenshotFileName"></div>
+                            <div class="text-muted-custom">PNG/JPG images or ZIP archive</div>
+                        </div>
+
+                        <div class="form-group-custom">
+                            <label for="tessDataPath">Tesseract Data Path (Optional)</label>
+                            <input type="text" id="tessDataPath" class="form-control-custom" placeholder="e.g., C:\tessdata\">
+                            <div class="text-muted-custom">Leave empty to use default</div>
+                        </div>
+
+                        <div class="alert-message" id="screenshotAlert"></div>
+                        <div class="loading" id="screenshotLoading">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p>Processing screenshots...</p>
+                        </div>
+
+                        <button type="submit" class="btn-submit" id="screenshotSubmit">
+                            <i class="fas fa-cog"></i> Process Screenshots
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Score Calculator Card -->
+            <div class="processing-card">
+                <div class="card-content">
+                    <div class="card-icon" style="background: linear-gradient(135deg, #f7971e 0%, #ffd200 100%); color: #2d2200;">
+                        <i class="fas fa-calculator"></i>
+                    </div>
+
+                    <h3>Pre-KVK Score Calculator</h3>
+                    <p>Merge governor details with scores and calculate combined totals by owner.</p>
+
+                    <form id="calculatorForm">
+                        <div class="form-group-custom">
+                            <label for="kvkDetailsFile">Details CSV File *</label>
+                            <div class="file-input-wrapper">
+                                <input type="file" id="kvkDetailsFile" name="kvkDetailsFile" accept=".csv" required>
+                                <label for="kvkDetailsFile" class="file-input-label">
+                                    <i class="fas fa-upload"></i> Choose Details CSV
+                                </label>
+                            </div>
+                            <div class="selected-file" id="kvkDetailsFileName"></div>
+                            <div class="text-muted-custom">Format: Governor ID, Owner, Status</div>
+                        </div>
+
+                        <div class="form-group-custom">
+                            <label for="scoresFile">Scores CSV File *</label>
+                            <div class="file-input-wrapper">
+                                <input type="file" id="scoresFile" name="scoresFile" accept=".csv" required>
+                                <label for="scoresFile" class="file-input-label">
+                                    <i class="fas fa-upload"></i> Choose Scores CSV
+                                </label>
+                            </div>
+                            <div class="selected-file" id="scoresFileName"></div>
+                            <div class="text-muted-custom">Format: Governor ID, Score</div>
+                        </div>
+
+                        <div class="alert-message" id="calculatorAlert"></div>
+                        <div class="loading" id="calculatorLoading">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p>Calculating scores...</p>
+                        </div>
+
+                        <button type="submit" class="btn-submit" id="calculatorSubmit">
+                            <i class="fas fa-cog"></i> Calculate Scores
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div class="results-container" id="resultsContainer" style="display: none;">
+            <div class="results-card">
+                <div class="results-header">
+                    <h3>
+                        <i class="fas fa-check-circle" style="color: #4caf50;"></i> Results
+                    </h3>
+                    <a id="downloadLink" class="download-btn" download>
+                        <i class="fas fa-download"></i> Download CSV
+                    </a>
+                </div>
+
+                <div id="resultsPreview">
+                    <!-- Results will be displayed here -->
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    // File input listeners
+    document.getElementById('detailsFile').addEventListener('change', function () {
+        document.getElementById('detailsFileName').textContent = this.files[0]?.name || '';
+    });
+
+    document.getElementById('screenshotZip').addEventListener('change', function () {
+        document.getElementById('screenshotFileName').textContent = this.files[0]?.name || '';
+    });
+
+    document.getElementById('kvkDetailsFile').addEventListener('change', function () {
+        document.getElementById('kvkDetailsFileName').textContent = this.files[0]?.name || '';
+    });
+
+    document.getElementById('scoresFile').addEventListener('change', function () {
+        document.getElementById('scoresFileName').textContent = this.files[0]?.name || '';
+    });
+
+    // Screenshot Merger Form Submission
+    document.getElementById('screenshotForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const detailsFile = document.getElementById('detailsFile').files[0];
+        const screenshotZip = document.getElementById('screenshotZip').files[0];
+        const tessDataPath = document.getElementById('tessDataPath').value || '';
+
+        if (!detailsFile || !screenshotZip) {
+            showAlert('screenshotAlert', 'Please select all required files', 'error');
+            return;
+        }
+
+        await processScreenshots(detailsFile, screenshotZip, tessDataPath);
+    });
+
+    // Score Calculator Form Submission
+    document.getElementById('calculatorForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const kvkDetailsFile = document.getElementById('kvkDetailsFile').files[0];
+        const scoresFile = document.getElementById('scoresFile').files[0];
+
+        if (!kvkDetailsFile || !scoresFile) {
+            showAlert('calculatorAlert', 'Please select all required files', 'error');
+            return;
+        }
+
+        await processScores(kvkDetailsFile, scoresFile);
+    });
+
+    async function processScreenshots(detailsFile, screenshotZip, tessDataPath) {
+        const loading = document.getElementById('screenshotLoading');
+        const submit = document.getElementById('screenshotSubmit');
+
+        loading.style.display = 'block';
+        submit.disabled = true;
+
+        try {
+            const formData = new FormData();
+            formData.append('detailsFile', detailsFile);
+            formData.append('screenshotZip', screenshotZip);
+            if (tessDataPath) {
+                formData.append('tessDataPath', tessDataPath);
+            }
+
+            const response = await fetch('/api/file-processing/screenshot-merger', {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                displayResults(result.content, result.sessionId);
+                showAlert('screenshotAlert', 'Processing completed successfully!', 'success');
+            } else {
+                showAlert('screenshotAlert', result.error || 'Processing failed', 'error');
+            }
+        } catch (error) {
+            showAlert('screenshotAlert', 'Error: ' + error.message, 'error');
+        } finally {
+            loading.style.display = 'none';
+            submit.disabled = false;
+        }
+    }
+
+    async function processScores(kvkDetailsFile, scoresFile) {
+        const loading = document.getElementById('calculatorLoading');
+        const submit = document.getElementById('calculatorSubmit');
+
+        loading.style.display = 'block';
+        submit.disabled = true;
+
+        try {
+            const formData = new FormData();
+            formData.append('detailsFile', kvkDetailsFile);
+            formData.append('scoresFile', scoresFile);
+
+            const response = await fetch('/api/file-processing/kvk-calculator', {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                displayResults(result.content, result.sessionId);
+                showAlert('calculatorAlert', 'Processing completed successfully!', 'success');
+            } else {
+                showAlert('calculatorAlert', result.error || 'Processing failed', 'error');
+            }
+        } catch (error) {
+            showAlert('calculatorAlert', 'Error: ' + error.message, 'error');
+        } finally {
+            loading.style.display = 'none';
+            submit.disabled = false;
+        }
+    }
+
+    let currentTableData = { headers: [], rows: [], sessionId: '' };
+    let sortConfig = { column: -1, ascending: true };
+    let filterConfig = {};
+
+    function displayResults(csvContent, sessionId) {
+        const lines = csvContent.trim().split('\n');
+        const headers = lines[0].split(',').map(h => h.trim());
+        const rows = lines.slice(1)
+            .filter(row => row.trim())
+            .map(row => row.split(',').map(cell => cell.trim()));
+
+        currentTableData = { headers, rows, sessionId };
+        sortConfig = { column: -1, ascending: true };
+        filterConfig = {};
+
+        // Create container for table and filters
+        let html = '<div id="table-and-filters">';
+        html += buildFilterUI(headers, rows);
+        html += '<div id="table-container"></div>';
+        html += '</div>';
+        
+        document.getElementById('resultsPreview').innerHTML = html;
+        
+        // Now render the table
+        renderTable(headers, rows);
+        setupSortHandlers(headers);
+        setupFilterHandlers();
+
+        document.getElementById('resultsContainer').style.display = 'block';
+
+        // Setup download link
+        const link = document.getElementById('downloadLink');
+        link.href = `/api/file-processing/download/${sessionId}`;
+
+        // Scroll to results
+        document.getElementById('resultsContainer').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function renderTable(headers, rows) {
+        let table = '<table class="results-table"><thead><tr>';
+        headers.forEach((header, index) => {
+            const sortClass = index === sortConfig.column 
+                ? (sortConfig.ascending ? 'sort-asc' : 'sort-desc') 
+                : 'sortable';
+            table += `<th class="${sortClass}" data-column="${index}">${header} <span class="filter-icon">🔍</span></th>`;
+        });
+        table += '</tr></thead><tbody>';
+
+        rows.forEach(row => {
+            table += '<tr>';
+            row.forEach(cell => {
+                table += `<td>${cell}</td>`;
+            });
+            table += '</tr>';
+        });
+
+        table += '</tbody></table>';
+        document.getElementById('table-container').innerHTML = table;
+    }
+
+    function buildFilterUI(headers, rows) {
+        let filterHTML = '<div class="filter-controls"><strong>Filters:</strong>';
+        
+        headers.forEach((header, index) => {
+            // Get unique values for this column
+            const uniqueValues = [...new Set(rows.map(row => row[index]))].sort();
+            
+            filterHTML += `<div>
+                <label style="font-weight: 600; margin-right: 8px; font-size: 0.9rem;">${header}:</label>
+                <select class="filter-input" data-column="${index}" style="width: 150px;">
+                    <option value="">All</option>`;
+            
+            uniqueValues.forEach(value => {
+                if (value.trim()) {
+                    filterHTML += `<option value="${value}">${value}</option>`;
+                }
+            });
+            
+            filterHTML += `</select></div>`;
+        });
+
+        filterHTML += `<button class="clear-filters-btn">Clear Filters</button>
+                       <div class="filter-status"></div></div>`;
+        
+        return filterHTML;
+    }
+
+    function setupFilterHandlers() {
+        document.querySelectorAll('.filter-input').forEach(select => {
+            select.addEventListener('change', function () {
+                const columnIndex = parseInt(this.getAttribute('data-column'));
+                filterConfig[columnIndex] = this.value;
+                applyFilters();
+            });
+        });
+
+        // Clear filters button
+        const clearBtn = document.querySelector('.clear-filters-btn');
+        if (clearBtn) {
+            clearBtn.addEventListener('click', function () {
+                filterConfig = {};
+                document.querySelectorAll('.filter-input').forEach(select => {
+                    select.value = '';
+                });
+                applyFilters();
+            });
+        }
+    }
+
+    function applyFilters() {
+        let filteredRows = currentTableData.rows.filter(row => {
+            return Object.keys(filterConfig).every(colIndex => {
+                const filterValue = filterConfig[colIndex];
+                if (!filterValue) return true;
+                return row[colIndex] === filterValue;
+            });
+        });
+
+        applySort(filteredRows);
+    }
+
+    function applySort(rows) {
+        if (sortConfig.column >= 0) {
+            const columnIndex = sortConfig.column;
+            rows.sort((rowA, rowB) => {
+                const cellA = rowA[columnIndex];
+                const cellB = rowB[columnIndex];
+
+                const numA = parseFloat(cellA);
+                const numB = parseFloat(cellB);
+                const isNumeric = !isNaN(numA) && !isNaN(numB);
+
+                let comparison = 0;
+                if (isNumeric) {
+                    comparison = numA - numB;
+                } else {
+                    comparison = cellA.localeCompare(cellB);
+                }
+
+                return sortConfig.ascending ? comparison : -comparison;
+            });
+        }
+
+        renderTableRows(rows);
+    }
+
+    function renderTableRows(rows) {
+        const table = document.querySelector('.results-table');
+        if (!table) return;
+        
+        let newTable = '<table class="results-table"><thead><tr>';
+        currentTableData.headers.forEach((header, index) => {
+            const sortClass = index === sortConfig.column 
+                ? (sortConfig.ascending ? 'sort-asc' : 'sort-desc') 
+                : 'sortable';
+            newTable += `<th class="${sortClass}" data-column="${index}">${header} <span class="filter-icon">🔍</span></th>`;
+        });
+        newTable += '</tr></thead><tbody>';
+
+        rows.forEach(row => {
+            newTable += '<tr>';
+            row.forEach(cell => {
+                newTable += `<td>${cell}</td>`;
+            });
+            newTable += '</tr>';
+        });
+
+        newTable += '</tbody></table>';
+        document.getElementById('table-container').innerHTML = newTable;
+        
+        // Re-attach sort handlers
+        setupSortHandlers(currentTableData.headers);
+        
+        // Update filter UI count
+        updateFilterStatus(rows.length);
+    }
+
+    function updateFilterStatus(visibleRows) {
+        let statusText = `Showing ${visibleRows} of ${currentTableData.rows.length} rows`;
+        if (Object.keys(filterConfig).length > 0) {
+            statusText += ` (${Object.keys(filterConfig).length} filter${Object.keys(filterConfig).length > 1 ? 's' : ''} active)`;
+        }
+        
+        let statusEl = document.querySelector('.filter-status');
+        if (statusEl) {
+            statusEl.textContent = statusText;
+        }
+    }
+
+    function setupSortHandlers(headers) {
+        document.querySelectorAll('.results-table th').forEach(th => {
+            th.onclick = null; // Remove old handlers
+            th.addEventListener('click', function () {
+                const columnIndex = parseInt(this.getAttribute('data-column'));
+                sortTable(columnIndex);
+            });
+        });
+    }
+
+    function sortTable(columnIndex) {
+        if (sortConfig.column === columnIndex) {
+            sortConfig.ascending = !sortConfig.ascending;
+        } else {
+            sortConfig.column = columnIndex;
+            sortConfig.ascending = true;
+        }
+
+        applyFilters();
+    }
+
+    function showAlert(elementId, message, type) {
+        const alert = document.getElementById(elementId);
+        alert.textContent = message;
+        alert.className = `alert-message alert-${type}`;
+        alert.style.display = 'block';
+
+        setTimeout(() => {
+            alert.style.display = 'none';
+        }, 5000);
+    }
+</script>
+</body>
+</html>

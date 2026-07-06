@@ -26,18 +26,12 @@ public class PreKVKScoreCalculator {
         }
     }
 
-    public static void main(String[] args) {
-        // Updated file paths using double backslashes for Windows pathing
-        String detailsFilePath = "C:\\rok\\details.csv";
-        String scoresFilePath  = "C:\\rok\\scores.csv";
-        String outputFilePath  = "C:\\rok\\output.csv";
-
-        // Step 1: Read Governor IDs and their respective scores into a Map
+    public static String calculateScores(String detailsFilePath, String scoresFilePath, String outputFilePath) throws IOException {
         Map<String, Integer> governorScores = new HashMap<>();
 
         try (BufferedReader br = new BufferedReader(new FileReader(scoresFilePath))) {
             String line;
-            br.readLine(); // Skip header
+            br.readLine();
 
             while ((line = br.readLine()) != null) {
                 String[] tokens = line.split(",");
@@ -48,17 +42,15 @@ public class PreKVKScoreCalculator {
                 }
             }
         } catch (IOException | NumberFormatException e) {
-            System.err.println("Error reading scores file: " + e.getMessage());
-            return;
+            throw new IOException("Error reading scores file: " + e.getMessage(), e);
         }
 
-        // Step 2: Read the details file, tie scores to records, and compute Owner Totals
         List<GovernorRecord> records = new ArrayList<>();
         Map<String, Integer> ownerTotalScores = new HashMap<>();
 
         try (BufferedReader br = new BufferedReader(new FileReader(detailsFilePath))) {
             String line;
-            br.readLine(); // Skip header
+            br.readLine();
 
             while ((line = br.readLine()) != null) {
                 String[] tokens = line.split(",");
@@ -75,11 +67,9 @@ public class PreKVKScoreCalculator {
                 }
             }
         } catch (IOException e) {
-            System.err.println("Error reading details file: " + e.getMessage());
-            return;
+            throw new IOException("Error reading details file: " + e.getMessage(), e);
         }
 
-        // Step 3: Write out to the new CSV file
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(outputFilePath))) {
             bw.write("Governor ID,Owner,Status,Total Score (Main + Farm)\n");
 
@@ -92,16 +82,31 @@ public class PreKVKScoreCalculator {
                 if (record.status.equalsIgnoreCase("main")) {
                     sb.append(ownerTotalScores.getOrDefault(record.owner, 0));
                 } else {
-                    sb.append(""); // Leaves farm rows blank in the totals column
+                    sb.append("");
                 }
 
                 bw.write(sb.toString());
                 bw.newLine();
             }
-            System.out.println("Processing complete! Output saved to: " + outputFilePath);
 
         } catch (IOException e) {
-            System.err.println("Error writing output file: " + e.getMessage());
+            throw new IOException("Error writing output file: " + e.getMessage(), e);
+        }
+
+        return outputFilePath;
+    }
+
+    public static void main(String[] args) {
+        String detailsFilePath = "C:\\rok\\details.csv";
+        String scoresFilePath  = "C:\\rok\\scores.csv";
+        String outputFilePath  = "C:\\rok\\output.csv";
+
+        try {
+            calculateScores(detailsFilePath, scoresFilePath, outputFilePath);
+            System.out.println("Processing complete! Output saved to: " + outputFilePath);
+        } catch (IOException e) {
+            System.err.println("Error: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 }
